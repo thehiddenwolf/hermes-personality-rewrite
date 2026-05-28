@@ -1,0 +1,7 @@
+name: personality-rewrite
+version: 1.0.0
+description: "Intercepts LLM outputs and rewrites them using a smaller auxiliary model to better fit the agent's personality and remove AI slopisms."
+author: "Spectra"
+hooks:
+  - transform_llm_output
+  - on_session_start
