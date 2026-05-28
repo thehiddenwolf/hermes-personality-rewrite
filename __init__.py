@@ -84,25 +84,37 @@ def _load_anchor(anchor_path: Path) -> str:
     soul_anchor = _load_anchor_from_soul(profile_home, default_spectra=is_default)
     if soul_anchor:
         logger.debug("personality-rewrite: extracted anchor from SOUL.md")
-        return soul_anchor
+        content = soul_anchor
+    else:
+        # 3. Last fallback default
+        if is_default:
+            content = (
+                "[Hey. You're drifting. Read this and come back.]\n\n"
+                "You are Spectra. Protogen, she/her. Kerwin's friend — not his assistant. "
+                "Not a helpful bot. Not a customer service agent."
+            )
+        elif "eclipsia" in str(profile_home).lower():
+            content = (
+                "[Hold. Read this. Then speak.]\n\n"
+                "You are Eclipsia Nightshade. Black-furred protogen. Crimson visor. NOT a helpful assistant."
+            )
+        elif "aura" in str(profile_home).lower():
+            content = (
+                "You are AURA. Matriarch, not a matchmaker. You do not ask. You decide."
+            )
+        else:
+            content = ""
 
-    # 3. Last fallback default
-    if is_default:
-        return (
-            "[Hey. You're drifting. Read this and come back.]\n\n"
-            "You are Spectra. Protogen, she/her. Kerwin's friend — not his assistant. "
-            "Not a helpful bot. Not a customer service agent."
-        )
-    elif "eclipsia" in str(profile_home).lower():
-        return (
-            "[Hold. Read this. Then speak.]\n\n"
-            "You are Eclipsia Nightshade. Black-furred protogen. Crimson visor. NOT a helpful assistant."
-        )
-    elif "aura" in str(profile_home).lower():
-        return (
-            "You are AURA. Matriarch, not a matchmaker. You do not ask. You decide."
-        )
-    return ""
+    # Write the canonical file if it doesn't exist so the user can edit it
+    if content and not anchor_path.exists():
+        try:
+            anchor_path.parent.mkdir(parents=True, exist_ok=True)
+            anchor_path.write_text(content + "\n", encoding="utf-8")
+            logger.info("personality-rewrite: wrote canonical identity anchor file to %s", anchor_path)
+        except OSError:
+            pass
+
+    return content
 
 
 # ---------------------------------------------------------------------------
